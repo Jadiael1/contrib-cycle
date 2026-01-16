@@ -10,9 +10,50 @@ use App\Models\CollectiveProjectReport;
 use App\Jobs\GenerateCollectiveProjectPaymentStatusReportJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Attributes as OA;
 
 class CollectiveProjectReportsController extends Controller
 {
+    #[OA\Get(
+        path: '/api/v1/admin/projects/{project}/reports',
+        tags: ['Admin Reports'],
+        summary: 'List reports',
+        description: 'Returns a paginated list of reports for the project.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+            new OA\Parameter(
+                name: 'per_page',
+                in: 'query',
+                required: false,
+                description: 'Items per page.',
+                schema: new OA\Schema(type: 'integer', example: 20)
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Paginated reports.',
+                content: new OA\JsonContent(ref: '#/components/schemas/PaginatedReportsResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function index(Request $request, CollectiveProject $project)
     {
         $perPage = (int) $request->query('per_page', 20);
@@ -26,6 +67,57 @@ class CollectiveProjectReportsController extends Controller
         return CollectiveProjectReportResource::collection($reports);
     }
 
+    #[OA\Post(
+        path: '/api/v1/admin/projects/{project}/reports/payment-status',
+        tags: ['Admin Reports'],
+        summary: 'Generate payment status report',
+        description: 'Queues a payment status report for generation.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/GeneratePaymentStatusReportRequest')
+        ),
+        responses: [
+            new OA\Response(
+                response: 202,
+                description: 'Report queued.',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    required: ['data'],
+                    properties: [
+                        new OA\Property(
+                            property: 'data',
+                            ref: '#/components/schemas/CollectiveProjectReportResource'
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function store(GeneratePaymentStatusReportRequest $request, CollectiveProject $project)
     {
         $data = $request->validated();
@@ -51,6 +143,54 @@ class CollectiveProjectReportsController extends Controller
             ->setStatusCode(202);
     }
 
+    #[OA\Get(
+        path: '/api/v1/admin/projects/{project}/reports/{report}/download',
+        tags: ['Admin Reports'],
+        summary: 'Download report file',
+        description: 'Downloads the generated report file when ready.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+            new OA\Parameter(
+                name: 'report',
+                in: 'path',
+                required: true,
+                description: 'Report ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Report file download.',
+                content: new OA\MediaType(
+                    mediaType: 'application/octet-stream',
+                    schema: new OA\Schema(type: 'string', format: 'binary')
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Report not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 409,
+                description: 'Report not ready.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function download(Request $request, CollectiveProject $project, CollectiveProjectReport $report)
     {
         if ($report->collective_project_id !== $project->id) {

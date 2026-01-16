@@ -6,7 +6,32 @@ use App\Models\CollectiveProjectPaymentMethod;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'UpdateCollectiveProjectPaymentMethodRequest',
+    type: 'object',
+    properties: [
+        new OA\Property(
+            property: 'payment_method_type',
+            type: 'string',
+            enum: ['pix', 'bank_transfer'],
+            nullable: true,
+            example: 'bank_transfer'
+        ),
+        new OA\Property(
+            property: 'payment_method_payload',
+            nullable: true,
+            oneOf: [
+                new OA\Schema(ref: '#/components/schemas/PaymentMethodPayloadPix'),
+                new OA\Schema(ref: '#/components/schemas/PaymentMethodPayloadBankTransfer'),
+            ]
+        ),
+        new OA\Property(property: 'label', type: 'string', nullable: true, example: 'Secondary'),
+        new OA\Property(property: 'is_active', type: 'boolean', nullable: true, example: true),
+        new OA\Property(property: 'sort_order', type: 'integer', nullable: true, example: 2),
+    ]
+)]
 class UpdateCollectiveProjectPaymentMethodRequest extends FormRequest
 {
     public function authorize(): bool

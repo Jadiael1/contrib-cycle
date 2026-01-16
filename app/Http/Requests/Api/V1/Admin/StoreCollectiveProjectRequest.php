@@ -4,7 +4,47 @@ namespace App\Http\Requests\Api\V1\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'StoreCollectiveProjectRequest',
+    type: 'object',
+    required: [
+        'title',
+        'participant_limit',
+        'amount_per_participant',
+        'payment_interval',
+        'payments_per_interval',
+        'payment_method_type',
+        'payment_method_payload',
+    ],
+    properties: [
+        new OA\Property(property: 'title', type: 'string', example: 'Community Cycle 2025'),
+        new OA\Property(property: 'description', type: 'string', nullable: true, example: 'Monthly contribution plan.'),
+        new OA\Property(property: 'participant_limit', type: 'integer', example: 100),
+        new OA\Property(property: 'amount_per_participant', type: 'number', format: 'float', example: 150.0),
+        new OA\Property(
+            property: 'payment_interval',
+            type: 'string',
+            enum: ['week', 'month', 'year'],
+            example: 'month'
+        ),
+        new OA\Property(property: 'payments_per_interval', type: 'integer', example: 4),
+        new OA\Property(
+            property: 'payment_method_type',
+            type: 'string',
+            enum: ['pix', 'bank_transfer'],
+            example: 'pix'
+        ),
+        new OA\Property(
+            property: 'payment_method_payload',
+            oneOf: [
+                new OA\Schema(ref: '#/components/schemas/PaymentMethodPayloadPix'),
+                new OA\Schema(ref: '#/components/schemas/PaymentMethodPayloadBankTransfer'),
+            ]
+        ),
+    ]
+)]
 class StoreCollectiveProjectRequest extends FormRequest
 {
     /**

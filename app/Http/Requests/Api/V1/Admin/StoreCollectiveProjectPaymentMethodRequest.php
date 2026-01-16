@@ -4,7 +4,31 @@ namespace App\Http\Requests\Api\V1\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'StoreCollectiveProjectPaymentMethodRequest',
+    type: 'object',
+    required: ['payment_method_type', 'payment_method_payload'],
+    properties: [
+        new OA\Property(
+            property: 'payment_method_type',
+            type: 'string',
+            enum: ['pix', 'bank_transfer'],
+            example: 'pix'
+        ),
+        new OA\Property(
+            property: 'payment_method_payload',
+            oneOf: [
+                new OA\Schema(ref: '#/components/schemas/PaymentMethodPayloadPix'),
+                new OA\Schema(ref: '#/components/schemas/PaymentMethodPayloadBankTransfer'),
+            ]
+        ),
+        new OA\Property(property: 'label', type: 'string', nullable: true, example: 'Primary'),
+        new OA\Property(property: 'is_active', type: 'boolean', nullable: true, example: true),
+        new OA\Property(property: 'sort_order', type: 'integer', nullable: true, example: 1),
+    ]
+)]
 class StoreCollectiveProjectPaymentMethodRequest extends FormRequest
 {
     public function authorize(): bool

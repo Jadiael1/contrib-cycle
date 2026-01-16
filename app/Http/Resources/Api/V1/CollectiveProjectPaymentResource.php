@@ -4,7 +4,21 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'CollectiveProjectPaymentResource',
+    type: 'object',
+    required: ['id', 'amount', 'paid_at', 'period'],
+    properties: [
+        new OA\Property(property: 'id', type: 'integer', format: 'int64', example: 55),
+        new OA\Property(property: 'amount', type: 'string', format: 'decimal', example: '150.00'),
+        new OA\Property(property: 'paid_at', type: 'string', format: 'date-time', example: '2025-05-10T12:00:00Z'),
+        new OA\Property(property: 'receipt_path', type: 'string', nullable: true, example: 'project-receipts/1/10/file.pdf'),
+        new OA\Property(property: 'period', ref: '#/components/schemas/PaymentPeriod'),
+        new OA\Property(property: 'created_at', type: 'string', format: 'date-time', nullable: true),
+    ]
+)]
 class CollectiveProjectPaymentResource extends JsonResource
 {
     public function toArray(Request $request): array

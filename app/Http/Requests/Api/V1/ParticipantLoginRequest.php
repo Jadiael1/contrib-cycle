@@ -3,7 +3,16 @@
 namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'ParticipantLoginRequest',
+    type: 'object',
+    required: ['phone'],
+    properties: [
+        new OA\Property(property: 'phone', type: 'string', example: '+5581999999999'),
+    ]
+)]
 class ParticipantLoginRequest extends FormRequest
 {
     /**

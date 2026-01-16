@@ -6,7 +6,21 @@ use App\Models\CollectiveProject;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'StoreCollectiveProjectPaymentRequest',
+    type: 'object',
+    required: ['year', 'sequence', 'paid_at'],
+    properties: [
+        new OA\Property(property: 'year', type: 'integer', example: 2025),
+        new OA\Property(property: 'month', type: 'integer', nullable: true, example: 5),
+        new OA\Property(property: 'week_of_month', type: 'integer', nullable: true, example: 2),
+        new OA\Property(property: 'sequence', type: 'integer', example: 1),
+        new OA\Property(property: 'paid_at', type: 'string', format: 'date-time', example: '2025-05-10T12:00:00Z'),
+        new OA\Property(property: 'receipt', type: 'string', format: 'binary', nullable: true),
+    ]
+)]
 class StoreCollectiveProjectPaymentRequest extends FormRequest
 {
     public function authorize(): bool

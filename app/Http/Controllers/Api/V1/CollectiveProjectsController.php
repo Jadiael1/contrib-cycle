@@ -7,9 +7,43 @@ use App\Http\Resources\Api\V1\CollectiveProjectResource;
 use App\Models\CollectiveProject;
 use App\Models\ProjectMembership;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class CollectiveProjectsController extends Controller
 {
+    #[OA\Get(
+        path: '/api/v1/projects/{project}',
+        tags: ['Participant Projects'],
+        summary: 'Get project details',
+        description: 'Returns project details plus membership and stats for the authenticated participant.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project slug.',
+                schema: new OA\Schema(type: 'string')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Project details with membership info.',
+                content: new OA\JsonContent(ref: '#/components/schemas/CollectiveProjectDetailResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function show(Request $request, CollectiveProject $project)
     {
         /** @var \App\Models\User $user */

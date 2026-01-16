@@ -3,7 +3,17 @@
 namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'AdminLoginRequest',
+    type: 'object',
+    required: ['username', 'password'],
+    properties: [
+        new OA\Property(property: 'username', type: 'string', example: 'admin'),
+        new OA\Property(property: 'password', type: 'string', format: 'password', example: 'secret123'),
+    ]
+)]
 class AdminLoginRequest extends FormRequest
 {
     /**

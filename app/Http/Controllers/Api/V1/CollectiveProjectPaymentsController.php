@@ -12,9 +12,58 @@ use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Attributes as OA;
 
 class CollectiveProjectPaymentsController extends Controller
 {
+    #[OA\Get(
+        path: '/api/v1/projects/{project}/payments',
+        tags: ['Participant Payments'],
+        summary: 'List payments',
+        description: 'Lists payments for the authenticated participant in the project.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project slug.',
+                schema: new OA\Schema(type: 'string')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Payment list.',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    required: ['data'],
+                    properties: [
+                        new OA\Property(
+                            property: 'data',
+                            type: 'array',
+                            items: new OA\Items(ref: '#/components/schemas/CollectiveProjectPaymentResource')
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 403,
+                description: 'Participation not confirmed.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function index(Request $request, CollectiveProject $project)
     {
         $user = $request->user();
@@ -39,6 +88,53 @@ class CollectiveProjectPaymentsController extends Controller
     }
 
     // endpoint pra ajudar o front a montar "Primeira Semana, Segunda..."
+    #[OA\Get(
+        path: '/api/v1/projects/{project}/payment-options',
+        tags: ['Participant Payments'],
+        summary: 'Get payment options',
+        description: 'Returns helper data for building payment period selectors.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project slug.',
+                schema: new OA\Schema(type: 'string')
+            ),
+            new OA\Parameter(
+                name: 'year',
+                in: 'query',
+                required: false,
+                description: 'Target year for week calculation.',
+                schema: new OA\Schema(type: 'integer', example: 2025)
+            ),
+            new OA\Parameter(
+                name: 'month',
+                in: 'query',
+                required: false,
+                description: 'Target month for week calculation (1-12).',
+                schema: new OA\Schema(type: 'integer', example: 5)
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Payment options.',
+                content: new OA\JsonContent(ref: '#/components/schemas/PaymentOptionsResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function options(Request $request, CollectiveProject $project)
     {
         $interval = $project->payment_interval;
@@ -80,6 +176,70 @@ class CollectiveProjectPaymentsController extends Controller
         return response()->json($resp);
     }
 
+    #[OA\Post(
+        path: '/api/v1/projects/{project}/payments',
+        tags: ['Participant Payments'],
+        summary: 'Create payment',
+        description: 'Creates a payment for the authenticated participant.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project slug.',
+                schema: new OA\Schema(type: 'string')
+            ),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(ref: '#/components/schemas/StoreCollectiveProjectPaymentRequest')
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Payment created.',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    required: ['data'],
+                    properties: [
+                        new OA\Property(
+                            property: 'data',
+                            ref: '#/components/schemas/CollectiveProjectPaymentResource'
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 403,
+                description: 'Participation not confirmed.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 409,
+                description: 'Payment already registered.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function store(StoreCollectiveProjectPaymentRequest $request, CollectiveProject $project)
     {
         $user = $request->user();

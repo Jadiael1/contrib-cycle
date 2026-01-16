@@ -10,9 +10,43 @@ use App\Models\CollectiveProjectPaymentMethod;
 use App\Models\ProjectMembership;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use OpenApi\Attributes as OA;
 
 class CollectiveProjectsController extends Controller
 {
+    #[OA\Get(
+        path: '/api/v1/admin/projects/{project}',
+        tags: ['Admin Projects'],
+        summary: 'Get project details (admin)',
+        description: 'Returns project details with counts and stats.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Project details.',
+                content: new OA\JsonContent(ref: '#/components/schemas/CollectiveProjectAdminDetailResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function show(CollectiveProject $project)
     {
         $project->load(['paymentMethods' => fn($q) => $q->orderBy('sort_order')]);
@@ -38,6 +72,28 @@ class CollectiveProjectsController extends Controller
         ]);
     }
 
+    #[OA\Get(
+        path: '/api/v1/admin/projects',
+        tags: ['Admin Projects'],
+        summary: 'List projects (admin)',
+        description: 'Returns all projects for administrators.',
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Project list.',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(ref: '#/components/schemas/CollectiveProject')
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function index()
     {
         return response()->json(
@@ -45,6 +101,40 @@ class CollectiveProjectsController extends Controller
         );
     }
 
+    #[OA\Post(
+        path: '/api/v1/admin/projects',
+        tags: ['Admin Projects'],
+        summary: 'Create project',
+        description: 'Creates a project with its initial payment method.',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/StoreCollectiveProjectRequest')
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Project created.',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    required: ['data'],
+                    properties: [
+                        new OA\Property(property: 'data', ref: '#/components/schemas/CollectiveProjectResource'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function store(StoreCollectiveProjectRequest $request)
     {
         $data = $request->validated();
