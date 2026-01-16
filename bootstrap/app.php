@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Middleware\AllowPrivateNetworkAccess;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 
@@ -18,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
         ]);
+        $middleware->prepend(HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
