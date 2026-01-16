@@ -63,12 +63,15 @@ class CollectiveProjectReport extends Model
     protected $fillable = [
         'collective_project_id',
         'created_by_user_id',
-        'report_type',
+        'type',
         'status',
         'filters',
-        'file_disk',
-        'file_path',
+        'disk',
+        'path',
         'file_name',
+        'mime_type',
+        'file_size',
+        'generated_at',
         'error_message',
     ];
 
