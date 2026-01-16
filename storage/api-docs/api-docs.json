@@ -1,0 +1,3223 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Contrib-Cycle",
+        "contact": {
+            "email": "jadiael1@gmail.com"
+        },
+        "license": {
+            "name": "MIT"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/auth/admin/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Admin login",
+                "description": "Authenticates an admin and returns a bearer token.",
+                "operationId": "45860d0fcd6e11b0dba7b78e5be45539",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminLoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token issued.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/projects/{project}/payment-methods": {
+            "get": {
+                "tags": [
+                    "Admin Payment Methods"
+                ],
+                "summary": "List payment methods",
+                "description": "Returns payment methods for a project.",
+                "operationId": "c4fd97b89ea9ec3fb7678d74d1cebd8c",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment method list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CollectiveProjectPaymentMethodResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin Payment Methods"
+                ],
+                "summary": "Create payment method",
+                "description": "Adds a payment method to the project.",
+                "operationId": "efa9c6cdc6aaf28af96c32f62959fb6d",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCollectiveProjectPaymentMethodRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Payment method created.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CollectiveProjectPaymentMethodResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/payment-methods/{paymentMethod}": {
+            "delete": {
+                "tags": [
+                    "Admin Payment Methods"
+                ],
+                "summary": "Deactivate payment method",
+                "description": "Deactivates a payment method. The project must keep at least one active method.",
+                "operationId": "cd54909737e88a42ab9eb3402243f9b6",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "paymentMethod",
+                        "in": "path",
+                        "description": "Payment method ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment method deactivated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Cannot deactivate last active method.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment method not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Admin Payment Methods"
+                ],
+                "summary": "Update payment method",
+                "description": "Updates a payment method for the project.",
+                "operationId": "b1ce741790cbe8a86a05193ef5da55d4",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "paymentMethod",
+                        "in": "path",
+                        "description": "Payment method ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCollectiveProjectPaymentMethodRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment method updated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CollectiveProjectPaymentMethodResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment method not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/reports": {
+            "get": {
+                "tags": [
+                    "Admin Reports"
+                ],
+                "summary": "List reports",
+                "description": "Returns a paginated list of reports for the project.",
+                "operationId": "4ee74035e3f0ed8616f253a345e0369d",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated reports.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedReportsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/reports/payment-status": {
+            "post": {
+                "tags": [
+                    "Admin Reports"
+                ],
+                "summary": "Generate payment status report",
+                "description": "Queues a payment status report for generation.",
+                "operationId": "c980f99ac6182e88f8cc3b1006763f33",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GeneratePaymentStatusReportRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Report queued.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CollectiveProjectReportResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/reports/{report}/download": {
+            "get": {
+                "tags": [
+                    "Admin Reports"
+                ],
+                "summary": "Download report file",
+                "description": "Downloads the generated report file when ready.",
+                "operationId": "8fe251a76d0cc8a13d72034aa5ec66fc",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "report",
+                        "in": "path",
+                        "description": "Report ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Report file download.",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Report not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Report not ready.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}": {
+            "get": {
+                "tags": [
+                    "Admin Projects"
+                ],
+                "summary": "Get project details (admin)",
+                "description": "Returns project details with counts and stats.",
+                "operationId": "f3facfdaefad8e20e9ce69436047855f",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Project details.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CollectiveProjectAdminDetailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects": {
+            "get": {
+                "tags": [
+                    "Admin Projects"
+                ],
+                "summary": "List projects (admin)",
+                "description": "Returns all projects for administrators.",
+                "operationId": "d0fd7e6737ef972fbe9c8f6333fb880d",
+                "responses": {
+                    "200": {
+                        "description": "Project list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CollectiveProject"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin Projects"
+                ],
+                "summary": "Create project",
+                "description": "Creates a project with its initial payment method.",
+                "operationId": "4b7d7c32c22cc37299082102259af3ca",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCollectiveProjectRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Project created.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CollectiveProjectResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/members": {
+            "get": {
+                "tags": [
+                    "Admin Members"
+                ],
+                "summary": "List project members",
+                "description": "Returns a paginated list of members for a project.",
+                "operationId": "6b5275f0b57eb047e0f877d544357e8e",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by membership status.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "accepted",
+                                "removed"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search by phone or name.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-100).",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated members.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedProjectMembersResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/members/{user}": {
+            "delete": {
+                "tags": [
+                    "Admin Members"
+                ],
+                "summary": "Remove project member",
+                "description": "Marks a member as removed from the project.",
+                "operationId": "0588a4b12f8ec96466f560819e2badbe",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "User ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Member removed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Membership not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout",
+                "description": "Revokes the current access token.",
+                "operationId": "f6b8957b4c0b25636613a9f0512a8ba9",
+                "responses": {
+                    "200": {
+                        "description": "Logged out.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/projects/{project}/payments": {
+            "get": {
+                "tags": [
+                    "Participant Payments"
+                ],
+                "summary": "List payments",
+                "description": "Lists payments for the authenticated participant in the project.",
+                "operationId": "62d622065a172e3d97a5bbe418b25c0c",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project slug.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CollectiveProjectPaymentResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Participation not confirmed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Participant Payments"
+                ],
+                "summary": "Create payment",
+                "description": "Creates a payment for the authenticated participant.",
+                "operationId": "def2e541a2319d334a6a39c43c52e19c",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project slug.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCollectiveProjectPaymentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Payment created.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CollectiveProjectPaymentResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Participation not confirmed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Payment already registered.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/projects/{project}/payment-options": {
+            "get": {
+                "tags": [
+                    "Participant Payments"
+                ],
+                "summary": "Get payment options",
+                "description": "Returns helper data for building payment period selectors.",
+                "operationId": "f96290364cefec1fa3cf0c5c5823bca9",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project slug.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "Target year for week calculation.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2025
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "description": "Target month for week calculation (1-12).",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment options.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentOptionsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/projects/{project}": {
+            "get": {
+                "tags": [
+                    "Participant Projects"
+                ],
+                "summary": "Get project details",
+                "description": "Returns project details plus membership and stats for the authenticated participant.",
+                "operationId": "e471a864b7b9b61c280bc4f6589bc8a1",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project slug.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Project details with membership info.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CollectiveProjectDetailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/participant/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Participant registration",
+                "description": "Registers a participant account.",
+                "operationId": "6d0668f0505b03cccafbc4dde4ffd1ce",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ParticipantRegisterRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Participant registered.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ParticipantRegisterResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/participant/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Participant login",
+                "description": "Authenticates a participant and returns a bearer token.",
+                "operationId": "9694ab757861b9fe6e81164f7801b64b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ParticipantLoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token issued.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthTokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{project}/membership": {
+            "get": {
+                "tags": [
+                    "Participant Projects"
+                ],
+                "summary": "Get membership status",
+                "description": "Returns the membership status for the authenticated participant.",
+                "operationId": "b59349b0fb741051410a469f9082d150",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project slug.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Membership status.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProjectMembershipStatus"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/projects/{project}/join": {
+            "post": {
+                "tags": [
+                    "Participant Projects"
+                ],
+                "summary": "Join a project",
+                "description": "Confirms participation for the authenticated participant.",
+                "operationId": "8cc41053415037fd1fdc30addc0c2af2",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project slug.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Participation confirmed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProjectMembershipJoinResponse"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Already participating.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Participant removed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Project is full.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/projects": {
+            "get": {
+                "tags": [
+                    "Public Projects"
+                ],
+                "summary": "List active projects",
+                "description": "Returns active projects with public payment method data.",
+                "operationId": "59a34a2197da5a84163e2179307d8dcb",
+                "responses": {
+                    "200": {
+                        "description": "List of active projects.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CollectiveProjectResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AdminLoginRequest": {
+                "required": [
+                    "username",
+                    "password"
+                ],
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "example": "admin"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "secret123"
+                    }
+                },
+                "type": "object"
+            },
+            "GeneratePaymentStatusReportRequest": {
+                "required": [
+                    "year"
+                ],
+                "properties": {
+                    "year": {
+                        "type": "integer",
+                        "example": 2025
+                    },
+                    "month": {
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "week_of_month": {
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "status_scope": {
+                        "type": "string",
+                        "enum": [
+                            "accepted_only",
+                            "include_removed"
+                        ],
+                        "example": "accepted_only",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "StoreCollectiveProjectPaymentMethodRequest": {
+                "required": [
+                    "payment_method_type",
+                    "payment_method_payload"
+                ],
+                "properties": {
+                    "payment_method_type": {
+                        "type": "string",
+                        "enum": [
+                            "pix",
+                            "bank_transfer"
+                        ],
+                        "example": "pix"
+                    },
+                    "payment_method_payload": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadPix"
+                            },
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadBankTransfer"
+                            }
+                        ]
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "Primary",
+                        "nullable": true
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true,
+                        "nullable": true
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "StoreCollectiveProjectRequest": {
+                "required": [
+                    "title",
+                    "participant_limit",
+                    "amount_per_participant",
+                    "payment_interval",
+                    "payments_per_interval",
+                    "payment_method_type",
+                    "payment_method_payload"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "example": "Community Cycle 2025"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Monthly contribution plan.",
+                        "nullable": true
+                    },
+                    "participant_limit": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "amount_per_participant": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 150
+                    },
+                    "payment_interval": {
+                        "type": "string",
+                        "enum": [
+                            "week",
+                            "month",
+                            "year"
+                        ],
+                        "example": "month"
+                    },
+                    "payments_per_interval": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "payment_method_type": {
+                        "type": "string",
+                        "enum": [
+                            "pix",
+                            "bank_transfer"
+                        ],
+                        "example": "pix"
+                    },
+                    "payment_method_payload": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadPix"
+                            },
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadBankTransfer"
+                            }
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCollectiveProjectPaymentMethodRequest": {
+                "properties": {
+                    "payment_method_type": {
+                        "type": "string",
+                        "enum": [
+                            "pix",
+                            "bank_transfer"
+                        ],
+                        "example": "bank_transfer",
+                        "nullable": true
+                    },
+                    "payment_method_payload": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadPix"
+                            },
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadBankTransfer"
+                            }
+                        ]
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "Secondary",
+                        "nullable": true
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true,
+                        "nullable": true
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ParticipantLoginRequest": {
+                "required": [
+                    "phone"
+                ],
+                "properties": {
+                    "phone": {
+                        "type": "string",
+                        "example": "+5581999999999"
+                    }
+                },
+                "type": "object"
+            },
+            "ParticipantRegisterRequest": {
+                "required": [
+                    "phone",
+                    "first_name",
+                    "last_name"
+                ],
+                "properties": {
+                    "phone": {
+                        "type": "string",
+                        "example": "+5581999999999"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "example": "Jane"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreCollectiveProjectPaymentRequest": {
+                "required": [
+                    "year",
+                    "sequence",
+                    "paid_at"
+                ],
+                "properties": {
+                    "year": {
+                        "type": "integer",
+                        "example": 2025
+                    },
+                    "month": {
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "week_of_month": {
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "sequence": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "paid_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-10T12:00:00Z"
+                    },
+                    "receipt": {
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProjectReportResource": {
+                "required": [
+                    "id",
+                    "type",
+                    "status",
+                    "filters",
+                    "file"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 5
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "payment_status"
+                        ],
+                        "example": "payment_status"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "processing",
+                            "completed",
+                            "failed"
+                        ],
+                        "example": "processing"
+                    },
+                    "filters": {
+                        "properties": {
+                            "year": {
+                                "type": "integer",
+                                "example": 2025
+                            },
+                            "month": {
+                                "type": "integer",
+                                "example": 5,
+                                "nullable": true
+                            },
+                            "week_of_month": {
+                                "type": "integer",
+                                "example": 2,
+                                "nullable": true
+                            },
+                            "status_scope": {
+                                "type": "string",
+                                "enum": [
+                                    "accepted_only",
+                                    "include_removed"
+                                ],
+                                "example": "accepted_only"
+                            },
+                            "disk": {
+                                "type": "string",
+                                "example": "local"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "file": {
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "example": "payment-status.csv",
+                                "nullable": true
+                            },
+                            "mime_type": {
+                                "type": "string",
+                                "example": "text/csv",
+                                "nullable": true
+                            },
+                            "size": {
+                                "type": "integer",
+                                "example": 102400,
+                                "nullable": true
+                            },
+                            "generated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "download_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_by_user_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "error_message": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectMemberResource": {
+                "required": [
+                    "membership_id",
+                    "status",
+                    "user"
+                ],
+                "properties": {
+                    "membership_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 99
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "accepted",
+                            "removed"
+                        ],
+                        "example": "accepted"
+                    },
+                    "accepted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "removed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "user": {
+                        "required": [
+                            "id",
+                            "phone",
+                            "first_name",
+                            "last_name"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 10
+                            },
+                            "phone": {
+                                "type": "string",
+                                "example": "+5581999999999"
+                            },
+                            "first_name": {
+                                "type": "string",
+                                "example": "Jane"
+                            },
+                            "last_name": {
+                                "type": "string",
+                                "example": "Doe"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProjectPaymentMethodResource": {
+                "required": [
+                    "id",
+                    "type",
+                    "sort_order",
+                    "is_active"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 12
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "pix",
+                            "bank_transfer"
+                        ],
+                        "example": "pix"
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "Primary",
+                        "nullable": true
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "payload": {
+                        "description": "Returned only for authenticated tokens with access to the payload.",
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadPix"
+                            },
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadBankTransfer"
+                            }
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProjectPaymentResource": {
+                "required": [
+                    "id",
+                    "amount",
+                    "paid_at",
+                    "period"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 55
+                    },
+                    "amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "example": "150.00"
+                    },
+                    "paid_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-10T12:00:00Z"
+                    },
+                    "receipt_path": {
+                        "type": "string",
+                        "example": "project-receipts/1/10/file.pdf",
+                        "nullable": true
+                    },
+                    "period": {
+                        "$ref": "#/components/schemas/PaymentPeriod"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProjectResource": {
+                "required": [
+                    "id",
+                    "title",
+                    "slug",
+                    "participant_limit",
+                    "amount_per_participant",
+                    "payment_interval",
+                    "payments_per_interval"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Community Cycle 2025"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "community-cycle-2025"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Monthly contribution plan.",
+                        "nullable": true
+                    },
+                    "participant_limit": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "amount_per_participant": {
+                        "type": "string",
+                        "format": "decimal",
+                        "example": "150.00"
+                    },
+                    "payment_interval": {
+                        "type": "string",
+                        "enum": [
+                            "week",
+                            "month",
+                            "year"
+                        ],
+                        "example": "month"
+                    },
+                    "payments_per_interval": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "payment_methods": {
+                        "description": "Present when payment methods are loaded.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CollectiveProjectPaymentMethodResource"
+                        },
+                        "nullable": true
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true,
+                        "nullable": true
+                    },
+                    "created_by_user_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProject": {
+                "required": [
+                    "id",
+                    "title",
+                    "slug",
+                    "participant_limit",
+                    "amount_per_participant",
+                    "payment_interval",
+                    "payments_per_interval",
+                    "is_active"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Community Cycle 2025"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "community-cycle-2025"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Monthly contribution plan.",
+                        "nullable": true
+                    },
+                    "participant_limit": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "amount_per_participant": {
+                        "type": "string",
+                        "format": "decimal",
+                        "example": "150.00"
+                    },
+                    "payment_interval": {
+                        "type": "string",
+                        "enum": [
+                            "week",
+                            "month",
+                            "year"
+                        ],
+                        "example": "month"
+                    },
+                    "payments_per_interval": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_by_user_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProjectPayment": {
+                "required": [
+                    "id",
+                    "collective_project_id",
+                    "user_id",
+                    "period_year",
+                    "sequence_in_period",
+                    "amount",
+                    "paid_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 55
+                    },
+                    "collective_project_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 10
+                    },
+                    "period_year": {
+                        "type": "integer",
+                        "example": 2025
+                    },
+                    "period_month": {
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "period_week_of_month": {
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "sequence_in_period": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "example": "150.00"
+                    },
+                    "paid_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-10T12:00:00Z"
+                    },
+                    "receipt_path": {
+                        "type": "string",
+                        "example": "project-receipts/1/10/file.pdf",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProjectPaymentMethod": {
+                "required": [
+                    "id",
+                    "collective_project_id",
+                    "payment_method_type",
+                    "is_active",
+                    "sort_order"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 12
+                    },
+                    "collective_project_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "payment_method_type": {
+                        "type": "string",
+                        "enum": [
+                            "pix",
+                            "bank_transfer"
+                        ],
+                        "example": "pix"
+                    },
+                    "payment_method_payload": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadPix"
+                            },
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodPayloadBankTransfer"
+                            }
+                        ]
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "Primary",
+                        "nullable": true
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProjectReport": {
+                "required": [
+                    "id",
+                    "collective_project_id",
+                    "type",
+                    "status"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 5
+                    },
+                    "collective_project_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "created_by_user_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "payment_status"
+                        ],
+                        "example": "payment_status"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "ready",
+                            "failed"
+                        ],
+                        "example": "pending"
+                    },
+                    "filters": {
+                        "properties": {
+                            "year": {
+                                "type": "integer",
+                                "example": 2025
+                            },
+                            "month": {
+                                "type": "integer",
+                                "example": 5,
+                                "nullable": true
+                            },
+                            "week_of_month": {
+                                "type": "integer",
+                                "example": 2,
+                                "nullable": true
+                            },
+                            "status_scope": {
+                                "type": "string",
+                                "enum": [
+                                    "accepted_only",
+                                    "include_removed"
+                                ],
+                                "example": "accepted_only"
+                            },
+                            "disk": {
+                                "type": "string",
+                                "example": "local"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "disk": {
+                        "type": "string",
+                        "example": "local",
+                        "nullable": true
+                    },
+                    "path": {
+                        "type": "string",
+                        "example": "reports/1/payment-status.csv",
+                        "nullable": true
+                    },
+                    "file_name": {
+                        "type": "string",
+                        "example": "payment-status.csv",
+                        "nullable": true
+                    },
+                    "mime_type": {
+                        "type": "string",
+                        "example": "text/csv",
+                        "nullable": true
+                    },
+                    "file_size": {
+                        "type": "integer",
+                        "example": 102400,
+                        "nullable": true
+                    },
+                    "generated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "error_message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectMembership": {
+                "required": [
+                    "id",
+                    "collective_project_id",
+                    "user_id",
+                    "status"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 99
+                    },
+                    "collective_project_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 10
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "accepted",
+                            "removed"
+                        ],
+                        "example": "accepted"
+                    },
+                    "accepted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "removed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "removed_by_user_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "required": [
+                    "id",
+                    "role"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "User ID",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "admin",
+                            "participant"
+                        ],
+                        "example": "admin"
+                    },
+                    "username": {
+                        "type": "string",
+                        "example": "admin",
+                        "nullable": true
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+5581999999999",
+                        "nullable": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorResponse": {
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Invalid credentials."
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationError": {
+                "required": [
+                    "message",
+                    "errors"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": {
+                            "field": [
+                                "The field is required."
+                            ]
+                        },
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "MessageResponse": {
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Logged out."
+                    }
+                },
+                "type": "object"
+            },
+            "AuthTokenResponse": {
+                "required": [
+                    "token"
+                ],
+                "properties": {
+                    "token": {
+                        "description": "Bearer token.",
+                        "type": "string",
+                        "example": "1|abc123token"
+                    }
+                },
+                "type": "object"
+            },
+            "ParticipantRegisterResponse": {
+                "required": [
+                    "user_id",
+                    "message"
+                ],
+                "properties": {
+                    "user_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 10
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Registered. Now you can join a project and confirm participation."
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectMembershipJoinResponse": {
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Participation confirmed."
+                    },
+                    "membership_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 42,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectMembershipStatus": {
+                "required": [
+                    "is_member"
+                ],
+                "properties": {
+                    "is_member": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "accepted",
+                            "removed"
+                        ],
+                        "example": "accepted",
+                        "nullable": true
+                    },
+                    "accepted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-10T12:00:00Z",
+                        "nullable": true
+                    },
+                    "removed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectMembershipMeta": {
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "accepted",
+                            "removed"
+                        ],
+                        "example": "accepted",
+                        "nullable": true
+                    },
+                    "accepted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-10T12:00:00Z",
+                        "nullable": true
+                    },
+                    "removed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "blocked": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectStats": {
+                "required": [
+                    "accepted_count",
+                    "available_slots",
+                    "is_full"
+                ],
+                "properties": {
+                    "accepted_count": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "available_slots": {
+                        "type": "integer",
+                        "example": 8
+                    },
+                    "is_full": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectCounts": {
+                "required": [
+                    "pending",
+                    "accepted",
+                    "removed"
+                ],
+                "properties": {
+                    "pending": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "accepted": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "removed": {
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentPeriod": {
+                "required": [
+                    "year",
+                    "sequence"
+                ],
+                "properties": {
+                    "year": {
+                        "type": "integer",
+                        "example": 2025
+                    },
+                    "month": {
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "week_of_month": {
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "sequence": {
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentOptionsResponse": {
+                "required": [
+                    "payment_interval",
+                    "payments_per_interval",
+                    "sequence_range"
+                ],
+                "properties": {
+                    "payment_interval": {
+                        "type": "string",
+                        "enum": [
+                            "week",
+                            "month",
+                            "year"
+                        ],
+                        "example": "month"
+                    },
+                    "payments_per_interval": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "sequence_range": {
+                        "required": [
+                            "min",
+                            "max"
+                        ],
+                        "properties": {
+                            "min": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "max": {
+                                "type": "integer",
+                                "example": 4
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "weeks_in_month": {
+                        "type": "integer",
+                        "example": 4,
+                        "nullable": true
+                    },
+                    "weeks": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "value",
+                                "label"
+                            ],
+                            "properties": {
+                                "value": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "label": {
+                                    "type": "string",
+                                    "example": "First Week"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "nullable": true
+                    },
+                    "hint": {
+                        "type": "string",
+                        "example": "Provide year and month query params to get weeks list.",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentMethodPayloadPix": {
+                "required": [
+                    "pix_key",
+                    "pix_holder_name"
+                ],
+                "properties": {
+                    "pix_key": {
+                        "type": "string",
+                        "example": "00020126580014br.gov.bcb.pix..."
+                    },
+                    "pix_holder_name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentMethodPayloadBankTransfer": {
+                "required": [
+                    "bank_name",
+                    "agency",
+                    "account_number",
+                    "account_holder_name"
+                ],
+                "properties": {
+                    "bank_name": {
+                        "type": "string",
+                        "example": "Bank SA"
+                    },
+                    "bank_code": {
+                        "type": "string",
+                        "example": "001",
+                        "nullable": true
+                    },
+                    "agency": {
+                        "type": "string",
+                        "example": "1234"
+                    },
+                    "account_number": {
+                        "type": "string",
+                        "example": "987654-3"
+                    },
+                    "account_type": {
+                        "type": "string",
+                        "enum": [
+                            "checking",
+                            "savings"
+                        ],
+                        "example": "checking",
+                        "nullable": true
+                    },
+                    "account_holder_name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "document": {
+                        "type": "string",
+                        "example": "123.456.789-10",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationLinks": {
+                "properties": {
+                    "first": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "last": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "prev": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "next": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationMetaLink": {
+                "required": [
+                    "label",
+                    "active"
+                ],
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationMeta": {
+                "required": [
+                    "current_page",
+                    "last_page",
+                    "per_page",
+                    "total"
+                ],
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "from": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "links": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PaginationMetaLink"
+                        }
+                    },
+                    "path": {
+                        "type": "string",
+                        "example": "https://api.example.com/v1/items"
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 20
+                    },
+                    "to": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 55
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedProjectMembersResponse": {
+                "required": [
+                    "data",
+                    "links",
+                    "meta"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProjectMemberResource"
+                        }
+                    },
+                    "links": {
+                        "$ref": "#/components/schemas/PaginationLinks"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedReportsResponse": {
+                "required": [
+                    "data",
+                    "links",
+                    "meta"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CollectiveProjectReportResource"
+                        }
+                    },
+                    "links": {
+                        "$ref": "#/components/schemas/PaginationLinks"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProjectDetailResponse": {
+                "required": [
+                    "data",
+                    "membership",
+                    "stats"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/CollectiveProjectResource"
+                    },
+                    "membership": {
+                        "$ref": "#/components/schemas/ProjectMembershipMeta"
+                    },
+                    "stats": {
+                        "$ref": "#/components/schemas/ProjectStats"
+                    }
+                },
+                "type": "object"
+            },
+            "CollectiveProjectAdminDetailResponse": {
+                "required": [
+                    "data",
+                    "counts",
+                    "stats"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/CollectiveProjectResource"
+                    },
+                    "counts": {
+                        "$ref": "#/components/schemas/ProjectCounts"
+                    },
+                    "stats": {
+                        "$ref": "#/components/schemas/ProjectStats"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Use the Bearer token returned by the login endpoints.",
+                "bearerFormat": "Sanctum",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Authentication and token endpoints."
+        },
+        {
+            "name": "Public Projects",
+            "description": "Publicly accessible project data."
+        },
+        {
+            "name": "Participant Projects",
+            "description": "Participant project access and membership."
+        },
+        {
+            "name": "Participant Payments",
+            "description": "Participant payment operations."
+        },
+        {
+            "name": "Admin Projects",
+            "description": "Admin project management."
+        },
+        {
+            "name": "Admin Members",
+            "description": "Admin membership management."
+        },
+        {
+            "name": "Admin Payment Methods",
+            "description": "Admin payment method management."
+        },
+        {
+            "name": "Admin Reports",
+            "description": "Admin reporting endpoints."
+        }
+    ]
+}
