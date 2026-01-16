@@ -125,7 +125,7 @@ class CollectiveProjectReportsController extends Controller
         $report = CollectiveProjectReport::create([
             'collective_project_id' => $project->id,
             'created_by_user_id' => $request->user()?->id,
-            'report_type' => 'payment_status',
+            'type' => 'payment_status',
             'status' => 'pending',
             'filters' => [
                 'year' => (int) $data['year'],

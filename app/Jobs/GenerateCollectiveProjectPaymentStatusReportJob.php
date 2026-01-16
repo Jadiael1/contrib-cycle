@@ -56,12 +56,12 @@ class GenerateCollectiveProjectPaymentStatusReportJob implements ShouldQueue
 
             $report->update([
                 'status' => 'ready',
-                'file_disk' => $disk,
-                'file_path' => $path,
+                'disk' => $disk,
+                'path' => $path,
                 'file_name' => $fileName,
-                // 'mime_type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                // 'file_size' => $size,
-                // 'generated_at' => now(),
+                'mime_type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'file_size' => $size,
+                'generated_at' => now(),
                 'error_message' => null,
             ]);
         } catch (Exception $e) {
