@@ -161,6 +161,94 @@ class ProjectMembersController extends Controller
     }
 
     #[OA\Post(
+        path: '/api/v1/admin/projects/{project}/members/{user}/activate',
+        tags: ['Admin Members'],
+        summary: 'Activate project member',
+        description: 'Accepts a pending member into the project.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+            new OA\Parameter(
+                name: 'user',
+                in: 'path',
+                required: true,
+                description: 'User ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Member activated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Membership not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 409,
+                description: 'Project is full.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
+    public function activate(Request $request, CollectiveProject $project, User $user)
+    {
+        return DB::transaction(function () use ($project, $user) {
+            $projectLocked = CollectiveProject::query()
+                ->whereKey($project->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $membership = ProjectMembership::query()
+                ->where('collective_project_id', $projectLocked->id)
+                ->where('user_id', $user->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $membership) {
+                return response()->json(['message' => 'Membership not found.'], 404);
+            }
+
+            if ($membership->status !== 'pending') {
+                return response()->json(['message' => 'Member is not pending.']);
+            }
+
+            $acceptedCount = ProjectMembership::query()
+                ->where('collective_project_id', $projectLocked->id)
+                ->where('status', 'accepted')
+                ->lockForUpdate()
+                ->count();
+
+            if ($acceptedCount >= $projectLocked->participant_limit) {
+                return response()->json(['message' => 'Project is full.'], 409);
+            }
+
+            $membership->update([
+                'status' => 'accepted',
+                'accepted_at' => $membership->accepted_at ?? now(),
+                'removed_at' => null,
+                'removed_by_user_id' => null,
+            ]);
+
+            return response()->json(['message' => 'Member activated.']);
+        });
+    }
+
+    #[OA\Post(
         path: '/api/v1/admin/projects/{project}/members/{user}/restore',
         tags: ['Admin Members'],
         summary: 'Restore project member',

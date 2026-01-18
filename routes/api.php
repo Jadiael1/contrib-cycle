@@ -42,6 +42,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/projects/{project}/members', [ProjectMembersController::class, 'index']);
         Route::delete('/projects/{project}/members/{user}', [ProjectMembersController::class, 'remove']);
+        Route::post('/projects/{project}/members/{user}/activate', [ProjectMembersController::class, 'activate']);
         Route::post('/projects/{project}/members/{user}/restore', [ProjectMembersController::class, 'restore']);
 
         Route::scopeBindings()->group(function () {
