@@ -213,6 +213,62 @@ class CollectiveProjectPaymentMethodsController extends Controller
     #[OA\Delete(
         path: '/api/v1/admin/projects/{project}/payment-methods/{paymentMethod}',
         tags: ['Admin Payment Methods'],
+        summary: 'Delete payment method',
+        description: 'Permanently removes a payment method.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+            new OA\Parameter(
+                name: 'paymentMethod',
+                in: 'path',
+                required: true,
+                description: 'Payment method ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Payment method deleted.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Payment method not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
+    public function destroy(Request $request, CollectiveProject $project, CollectiveProjectPaymentMethod $paymentMethod)
+    {
+        // regra simples: projeto precisa ter pelo menos 1 metodo ativo
+        $activeCount = $project->paymentMethods()->where('is_active', true)->count();
+
+        if ($activeCount <= 1) {
+            return response()->json([
+                'message' => 'Project must have at least one active payment method.',
+            ], 422);
+        }
+
+        $paymentMethod->delete();
+
+        return response()->json(['message' => 'Payment method deleted.']);
+    }
+
+    #[OA\Post(
+        path: '/api/v1/admin/projects/{project}/payment-methods/{paymentMethod}/deactivate',
+        tags: ['Admin Payment Methods'],
         summary: 'Deactivate payment method',
         description: 'Deactivates a payment method. The project must keep at least one active method.',
         security: [['bearerAuth' => []]],
@@ -255,9 +311,9 @@ class CollectiveProjectPaymentMethodsController extends Controller
             ),
         ]
     )]
-    public function destroy(Request $request, CollectiveProject $project, CollectiveProjectPaymentMethod $paymentMethod)
+    public function deactivate(CollectiveProject $project, CollectiveProjectPaymentMethod $paymentMethod)
     {
-        // regra simples: projeto precisa ter pelo menos 1 método ativo
+        // regra simples: projeto precisa ter pelo menos 1 metodo ativo
         if ($paymentMethod->is_active) {
             $activeCount = $project->paymentMethods()->where('is_active', true)->count();
 

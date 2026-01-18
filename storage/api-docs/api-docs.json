@@ -223,8 +223,8 @@
                 "tags": [
                     "Admin Payment Methods"
                 ],
-                "summary": "Deactivate payment method",
-                "description": "Deactivates a payment method. The project must keep at least one active method.",
+                "summary": "Delete payment method",
+                "description": "Permanently removes a payment method.",
                 "operationId": "cd54909737e88a42ab9eb3402243f9b6",
                 "parameters": [
                     {
@@ -250,21 +250,11 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Payment method deactivated.",
+                        "description": "Payment method deleted.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/MessageResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Cannot deactivate last active method.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
                                 }
                             }
                         }
@@ -360,6 +350,154 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment method not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/payment-methods/{paymentMethod}/deactivate": {
+            "post": {
+                "tags": [
+                    "Admin Payment Methods"
+                ],
+                "summary": "Deactivate payment method",
+                "description": "Deactivates a payment method. The project must keep at least one active method.",
+                "operationId": "7e90733f108e00838184d47cabb70d1f",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "paymentMethod",
+                        "in": "path",
+                        "description": "Payment method ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment method deactivated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Cannot deactivate last active method.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment method not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/payment-methods/{paymentMethod}/restore": {
+            "post": {
+                "tags": [
+                    "Admin Payment Methods"
+                ],
+                "summary": "Activate payment method",
+                "description": "Activates a payment method.",
+                "operationId": "375f543e292916bbc5ff275aad868def",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "paymentMethod",
+                        "in": "path",
+                        "description": "Payment method ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment method activated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
                                 }
                             }
                         }

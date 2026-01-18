@@ -49,6 +49,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/projects/{project}/payment-methods', [CollectiveProjectPaymentMethodsController::class, 'store']);
             Route::patch('/projects/{project}/payment-methods/{paymentMethod}', [CollectiveProjectPaymentMethodsController::class, 'update']);
             Route::delete('/projects/{project}/payment-methods/{paymentMethod}', [CollectiveProjectPaymentMethodsController::class, 'destroy']);
+            Route::post('/projects/{project}/payment-methods/{paymentMethod}/deactivate', [CollectiveProjectPaymentMethodsController::class, 'deactivate']);
             Route::post('/projects/{project}/payment-methods/{paymentMethod}/restore', [CollectiveProjectPaymentMethodsController::class, 'restore']);
         });
 
