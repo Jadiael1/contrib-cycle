@@ -38,4 +38,28 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Logged out.']);
     }
+
+    #[OA\Get(
+        path: '/api/v1/auth/me',
+        tags: ['Auth'],
+        summary: 'Get current user',
+        description: 'Returns the authenticated user.',
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Authenticated user.',
+                content: new OA\JsonContent(ref: '#/components/schemas/User')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
+    public function me(Request $request)
+    {
+        return $request->user();
+    }
 }

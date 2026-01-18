@@ -20,7 +20,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/participant/login', [ParticipantAuthController::class, 'login']);
 
     Route::middleware('auth:sanctum')->post('/auth/logout', [AuthController::class, 'logout']);
-    Route::middleware('auth:sanctum')->get('/me', fn(Request $request) => $request->user());
+    Route::middleware('auth:sanctum')->get('/auth/me', [AuthController::class, 'me']);
 
     Route::get('/projects', [PublicCollectiveProjectsController::class, 'index']);
 
