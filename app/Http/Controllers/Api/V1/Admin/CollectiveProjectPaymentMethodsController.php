@@ -253,12 +253,24 @@ class CollectiveProjectPaymentMethodsController extends Controller
     public function destroy(Request $request, CollectiveProject $project, CollectiveProjectPaymentMethod $paymentMethod)
     {
         // regra simples: projeto precisa ter pelo menos 1 metodo ativo
-        $activeCount = $project->paymentMethods()->where('is_active', true)->count();
-
-        if ($activeCount <= 1) {
+        $projectsCount = $project->paymentMethods()->count();
+        if ($projectsCount <= 1) {
             return response()->json([
                 'message' => 'Project must have at least one active payment method.',
             ], 422);
+        }
+
+        if ($paymentMethod->is_active) {
+            $hasOtherActive = $project->paymentMethods()
+                ->where('is_active', true)
+                ->whereKeyNot($paymentMethod->getKey())
+                ->exists();
+
+            if (! $hasOtherActive) {
+                return response()->json([
+                    'message' => 'Project must have at least one active payment method.',
+                ], 422);
+            }
         }
 
         $paymentMethod->delete();
