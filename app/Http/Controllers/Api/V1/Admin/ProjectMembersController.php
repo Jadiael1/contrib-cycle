@@ -100,10 +100,10 @@ class ProjectMembersController extends Controller
         return ProjectMemberResource::collection($memberships);
     }
 
-    #[OA\Delete(
-        path: '/api/v1/admin/projects/{project}/members/{user}',
+    #[OA\Post(
+        path: '/api/v1/admin/projects/{project}/members/{user}/deactivate',
         tags: ['Admin Members'],
-        summary: 'Remove project member',
+        summary: 'Deactivate project member',
         description: 'Marks a member as removed from the project.',
         security: [['bearerAuth' => []]],
         parameters: [
@@ -125,7 +125,7 @@ class ProjectMembersController extends Controller
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Member removed.',
+                description: 'Member deactivated.',
                 content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse')
             ),
             new OA\Response(
@@ -140,7 +140,7 @@ class ProjectMembersController extends Controller
             ),
         ]
     )]
-    public function remove(Request $request, CollectiveProject $project, User $user)
+    public function deactivate(Request $request, CollectiveProject $project, User $user)
     {
         $membership = ProjectMembership::query()
             ->where('collective_project_id', $project->id)
@@ -157,7 +157,7 @@ class ProjectMembersController extends Controller
             'removed_by_user_id' => $request->user()->id,
         ]);
 
-        return response()->json(['message' => 'Member removed.']);
+        return response()->json(['message' => 'Member deactivated.']);
     }
 
     #[OA\Post(
@@ -334,5 +334,61 @@ class ProjectMembersController extends Controller
 
             return response()->json(['message' => 'Member restored.']);
         });
+    }
+
+    #[OA\Delete(
+        path: '/api/v1/admin/projects/{project}/members/{user}',
+        tags: ['Admin Members'],
+        summary: 'Remove project member',
+        description: 'Permanently deletes a membership from the project.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+            new OA\Parameter(
+                name: 'user',
+                in: 'path',
+                required: true,
+                description: 'User ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Member removed.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Membership not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
+    public function remove(CollectiveProject $project, User $user)
+    {
+        $membership = ProjectMembership::query()
+            ->where('collective_project_id', $project->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (! $membership) {
+            return response()->json(['message' => 'Membership not found.'], 404);
+        }
+
+        $membership->delete();
+
+        return response()->json(['message' => 'Member removed.']);
     }
 }
