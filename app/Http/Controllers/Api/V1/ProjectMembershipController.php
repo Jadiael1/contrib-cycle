@@ -147,8 +147,8 @@ class ProjectMembershipController extends Controller
             $membership = ProjectMembership::updateOrCreate(
                 ['collective_project_id' => $projectLocked->id, 'user_id' => $user->id],
                 [
-                    'status' => 'accepted',
-                    'accepted_at' => now(),
+                    'status' => 'pending',
+                    'accepted_at' => null,
                     'removed_at' => null,
                     'removed_by_user_id' => null,
                 ]
