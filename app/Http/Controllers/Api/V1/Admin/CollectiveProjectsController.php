@@ -7,8 +7,11 @@ use App\Http\Requests\Api\V1\Admin\StoreCollectiveProjectRequest;
 use App\Http\Resources\Api\V1\CollectiveProjectResource;
 use App\Models\CollectiveProject;
 use App\Models\CollectiveProjectPaymentMethod;
+use App\Models\CollectiveProjectReport;
 use App\Models\ProjectMembership;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
 
@@ -176,5 +179,105 @@ class CollectiveProjectsController extends Controller
                 ->response()
                 ->setStatusCode(201);
         });
+    }
+
+    #[OA\Delete(
+        path: '/api/v1/admin/projects/{project}',
+        tags: ['Admin Projects'],
+        summary: 'Delete project',
+        description: 'Deletes a project and cleans related data.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Project deleted.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
+    public function destroy(CollectiveProject $project)
+    {
+        $projectId = $project->id;
+
+        $reports = CollectiveProjectReport::query()
+            ->where('collective_project_id', $projectId)
+            ->get(['disk', 'path']);
+
+        $reportDisks = $reports
+            ->pluck('disk')
+            ->filter()
+            ->map(fn ($disk) => (string) $disk)
+            ->unique()
+            ->values();
+
+        DB::transaction(function () use ($project) {
+            $project->delete();
+        });
+
+        foreach ($reports as $report) {
+            if (! $report->path) {
+                continue;
+            }
+
+            $disk = $report->disk ?: 'local';
+
+            try {
+                Storage::disk($disk)->delete($report->path);
+            } catch (\Throwable $e) {
+                Log::warning('Failed to delete project report file.', [
+                    'project_id' => $projectId,
+                    'disk' => $disk,
+                    'path' => $report->path,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        if ($reportDisks->isEmpty()) {
+            $reportDisks = collect(['local']);
+        }
+
+        foreach ($reportDisks as $disk) {
+            try {
+                Storage::disk($disk)->deleteDirectory("reports/{$projectId}");
+            } catch (\Throwable $e) {
+                Log::warning('Failed to delete project reports directory.', [
+                    'project_id' => $projectId,
+                    'disk' => $disk,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        try {
+            Storage::disk('public')->deleteDirectory("project-receipts/{$projectId}");
+        } catch (\Throwable $e) {
+            Log::warning('Failed to delete project receipts directory.', [
+                'project_id' => $projectId,
+                'disk' => 'public',
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return response()->json(['message' => 'Project deleted.']);
     }
 }

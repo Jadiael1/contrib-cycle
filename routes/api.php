@@ -38,6 +38,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/projects', [AdminProjectsController::class, 'index']);
         Route::post('/projects', [AdminProjectsController::class, 'store']);
         Route::get('/projects/{project}', [AdminProjectsController::class, 'show']);
+        Route::delete('/projects/{project}', [AdminProjectsController::class, 'destroy']);
 
         Route::get('/projects/{project}/members', [ProjectMembersController::class, 'index']);
         Route::delete('/projects/{project}/members/{user}', [ProjectMembersController::class, 'remove']);
