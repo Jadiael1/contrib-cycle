@@ -68,7 +68,7 @@ class ParticipantAuthController extends Controller
             ),
             new OA\Response(
                 response: 404,
-                description: 'User not found.',
+                description: 'Incorrect username or password.',
                 content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
             ),
             new OA\Response(
@@ -88,7 +88,7 @@ class ParticipantAuthController extends Controller
             ->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found.'], 404);
+            return response()->json(['message' => 'Incorrect username or password.'], 404);
         }
 
         $user->tokens()->delete();
