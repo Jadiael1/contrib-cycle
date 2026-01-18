@@ -272,4 +272,53 @@ class CollectiveProjectPaymentMethodsController extends Controller
 
         return response()->json(['message' => 'Payment method deactivated.']);
     }
+
+    #[OA\Post(
+        path: '/api/v1/admin/projects/{project}/payment-methods/{paymentMethod}/restore',
+        tags: ['Admin Payment Methods'],
+        summary: 'Activate payment method',
+        description: 'Activates a payment method.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+            new OA\Parameter(
+                name: 'paymentMethod',
+                in: 'path',
+                required: true,
+                description: 'Payment method ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Payment method activated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Payment method not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
+    public function restore(CollectiveProject $project, CollectiveProjectPaymentMethod $paymentMethod)
+    {
+        if (! $paymentMethod->is_active) {
+            $paymentMethod->update(['is_active' => true]);
+        }
+
+        return response()->json(['message' => 'Payment method activated.']);
+    }
 }
