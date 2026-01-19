@@ -11,13 +11,12 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(
     schema: 'StoreCollectiveProjectPaymentRequest',
     type: 'object',
-    required: ['year', 'sequence', 'paid_at'],
+    required: ['year', 'sequence'],
     properties: [
         new OA\Property(property: 'year', type: 'integer', example: 2025),
         new OA\Property(property: 'month', type: 'integer', nullable: true, example: 5),
         new OA\Property(property: 'week_of_month', type: 'integer', nullable: true, example: 2),
         new OA\Property(property: 'sequence', type: 'integer', example: 1),
-        new OA\Property(property: 'paid_at', type: 'string', format: 'date-time', example: '2025-05-10T12:00:00Z'),
         new OA\Property(property: 'receipt', type: 'string', format: 'binary', nullable: true),
     ]
 )]
@@ -35,7 +34,6 @@ class StoreCollectiveProjectPaymentRequest extends FormRequest
             'month' => $this->input('month'), // pode vir null
             'week_of_month' => $this->input('week_of_month'),
             'sequence' => $this->input('sequence', 1),
-            'paid_at' => $this->input('paid_at', now()->toISOString()),
         ]);
     }
 
@@ -50,7 +48,6 @@ class StoreCollectiveProjectPaymentRequest extends FormRequest
         $rules = [
             'year' => ['required', 'integer', 'min:2000', 'max:2100'],
             'sequence' => ['required', 'integer', 'min:1', 'max:' . $maxSeq],
-            'paid_at' => ['required', 'date'],
 
             // comprovante opcional
             'receipt' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,pdf'],
