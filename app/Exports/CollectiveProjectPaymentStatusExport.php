@@ -7,6 +7,7 @@ use App\Models\CollectiveProjectPayment;
 use App\Models\ProjectMembership;
 use Carbon\Carbon;
 use Generator;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromGenerator;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -39,6 +40,7 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
             'Periodo',
             'Intervalo por periodo',
             'Situacao pagamento',
+            'Comprovante',
             'Pago em',
             'Valor esperado',
         ];
@@ -102,12 +104,16 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
                 );
 
                 // se houver duplicados (não deveria por unique), fica o mais recente
-                $paid[(int)$p->user_id][$key] = $p->paid_at?->toISOString();
+                $paid[(int) $p->user_id][$key] = [
+                    'paid_at' => $p->paid_at?->toISOString(),
+                    'receipt_url' => $this->buildReceiptUrl($p->receipt_path),
+                ];
             }
 
             foreach ($chunk as $m) {
                 foreach ($slots as $slot) {
-                    $paidAtIso = $paid[(int)$m->user_id][$slot['key']] ?? null;
+                    $payment = $paid[(int) $m->user_id][$slot['key']] ?? null;
+                    $paidAtIso = $payment['paid_at'] ?? null;
 
                     $status = $paidAtIso ? 'paid' : 'pending';
 
@@ -118,6 +124,7 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
                         $slot['label'],
                         $slot['sequence'],
                         $this->translateStatus($status),
+                        $this->buildReceiptLink($payment['receipt_url'] ?? null),
                         $paidAtIso,
                         (string) $this->project->amount_per_participant,
                     ];
@@ -137,6 +144,11 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
     {
         if ($cell->getColumn() === 'C') {
             $cell->setValueExplicit((string) $value, DataType::TYPE_STRING);
+            return true;
+        }
+
+        if (is_string($value) && str_starts_with($value, '=HYPERLINK(')) {
+            $cell->setValueExplicit($value, DataType::TYPE_FORMULA);
             return true;
         }
 
@@ -171,6 +183,7 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
             'period_week_of_month',
             'sequence_in_period',
             'paid_at',
+            'receipt_path',
         ]);
     }
 
@@ -232,6 +245,26 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
             'pending' => 'Pendente',
             default => $status,
         };
+    }
+
+    private function buildReceiptUrl(?string $receiptPath): ?string
+    {
+        if (! $receiptPath) {
+            return null;
+        }
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk->url($receiptPath);
+    }
+
+    private function buildReceiptLink(?string $receiptUrl): ?string
+    {
+        if (! $receiptUrl) {
+            return null;
+        }
+
+        return sprintf('=HYPERLINK("%s","Ver comprovante")', $receiptUrl);
     }
 
     private function slotKey(int $year, int $month, int $week, int $seq): string
