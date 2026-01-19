@@ -256,7 +256,7 @@ class CollectiveProjectSeeder extends Seeder
         $perInterval = max(1, (int) $project->payments_per_interval);
 
         $reference = $referenceDate ? Carbon::instance($referenceDate) : Carbon::now();
-        $baseDate = $this->shiftDate($reference, $interval, -($paymentCount + random_int(1, 3)));
+        $baseDate = $this->shiftDate($reference, $interval, -($paymentCount - 1));
 
         for ($i = 0; $i < $paymentCount; $i++) {
             $paidAt = $this->shiftDate($baseDate, $interval, $i)
