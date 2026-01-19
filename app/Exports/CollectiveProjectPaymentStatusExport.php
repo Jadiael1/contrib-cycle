@@ -7,9 +7,9 @@ use App\Models\CollectiveProjectPayment;
 use App\Models\ProjectMembership;
 use Carbon\Carbon;
 use Generator;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromGenerator;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -18,7 +18,7 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class CollectiveProjectPaymentStatusExport extends StringValueBinder implements FromGenerator, WithHeadings, WithColumnFormatting, WithCustomValueBinder
+class CollectiveProjectPaymentStatusExport extends StringValueBinder implements FromGenerator, WithHeadings, WithColumnFormatting, WithCustomValueBinder, ShouldAutoSize
 {
     use Exportable;
 
