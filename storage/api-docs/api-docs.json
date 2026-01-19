@@ -985,6 +985,124 @@
                 ]
             }
         },
+        "/api/v1/admin/projects/{project}/deactivate": {
+            "post": {
+                "tags": [
+                    "Admin Projects"
+                ],
+                "summary": "Deactivate project",
+                "description": "Marks a project as inactive.",
+                "operationId": "cae06e6b891ddad0e957d4a3df5ceba1",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Project deactivated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/activate": {
+            "post": {
+                "tags": [
+                    "Admin Projects"
+                ],
+                "summary": "Activate project",
+                "description": "Marks a project as active.",
+                "operationId": "8069eeceb97142cee2be9836fc54937f",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Project activated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/projects/{project}/members": {
             "get": {
                 "tags": [
@@ -1077,14 +1195,14 @@
                 ]
             }
         },
-        "/api/v1/admin/projects/{project}/members/{user}": {
-            "delete": {
+        "/api/v1/admin/projects/{project}/members/{user}/deactivate": {
+            "post": {
                 "tags": [
                     "Admin Members"
                 ],
-                "summary": "Remove project member",
+                "summary": "Deactivate project member",
                 "description": "Marks a member as removed from the project.",
-                "operationId": "0588a4b12f8ec96466f560819e2badbe",
+                "operationId": "017e163ba21af0a2f9123fcbceb69369",
                 "parameters": [
                     {
                         "name": "project",
@@ -1109,7 +1227,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Member removed.",
+                        "description": "Member deactivated.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1120,6 +1238,85 @@
                     },
                     "404": {
                         "description": "Membership not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/members/{user}/activate": {
+            "post": {
+                "tags": [
+                    "Admin Members"
+                ],
+                "summary": "Activate project member",
+                "description": "Accepts a pending member into the project.",
+                "operationId": "2bbb59e5943772dcaaaa7d6299844538",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "User ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Member activated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Membership not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Project is full.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1199,6 +1396,75 @@
                     },
                     "409": {
                         "description": "Project is full.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/projects/{project}/members/{user}": {
+            "delete": {
+                "tags": [
+                    "Admin Members"
+                ],
+                "summary": "Remove project member",
+                "description": "Permanently deletes a membership from the project.",
+                "operationId": "0588a4b12f8ec96466f560819e2badbe",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "Project ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "User ID.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Member removed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Membership not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1690,7 +1956,7 @@
                         }
                     },
                     "404": {
-                        "description": "User not found.",
+                        "description": "Incorrect username or password.",
                         "content": {
                             "application/json": {
                                 "schema": {
