@@ -276,7 +276,7 @@ class CollectiveProjectPaymentsController extends Controller
             $weekOfMonth = 0;
         }
 
-        $paidAt = Carbon::parse($data['paid_at']);
+        $paidAt = Carbon::now();
 
         $receiptPath = null;
         if ($request->hasFile('receipt')) {
