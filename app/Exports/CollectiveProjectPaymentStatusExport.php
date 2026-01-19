@@ -10,16 +10,18 @@ use Generator;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromGenerator;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class CollectiveProjectPaymentStatusExport extends StringValueBinder implements FromGenerator, WithHeadings, WithColumnFormatting, WithCustomValueBinder, ShouldAutoSize
+class CollectiveProjectPaymentStatusExport extends StringValueBinder implements FromGenerator, WithHeadings, WithColumnFormatting, WithCustomValueBinder, ShouldAutoSize, WithEvents
 {
     use Exportable;
 
@@ -30,6 +32,11 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
         private readonly ?int $weekOfMonth,
         private readonly string $statusScope = 'accepted_only',
     ) {}
+
+    /** @var array<int, string> */
+    private array $receiptLinks = [];
+
+    private int $rowIndex = 1;
 
     public function headings(): array
     {
@@ -48,6 +55,9 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
 
     public function generator(): Generator
     {
+        $this->receiptLinks = [];
+        $this->rowIndex = 1;
+
         $interval = $this->project->payment_interval;
         $per = (int) $this->project->payments_per_interval;
 
@@ -112,6 +122,7 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
 
             foreach ($chunk as $m) {
                 foreach ($slots as $slot) {
+                    $this->rowIndex++;
                     $payment = $paid[(int) $m->user_id][$slot['key']] ?? null;
                     $paidAtIso = $payment['paid_at'] ?? null;
 
@@ -124,7 +135,7 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
                         $slot['label'],
                         $slot['sequence'],
                         $this->translateStatus($status),
-                        $this->buildReceiptLink($payment['receipt_url'] ?? null),
+                        $this->registerReceiptLink($payment['receipt_url'] ?? null, $this->rowIndex),
                         $paidAtIso,
                         (string) $this->project->amount_per_participant,
                     ];
@@ -147,12 +158,27 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
             return true;
         }
 
-        if (is_string($value) && str_starts_with($value, '=HYPERLINK(')) {
-            $cell->setValueExplicit($value, DataType::TYPE_FORMULA);
-            return true;
-        }
-
         return parent::bindValue($cell, $value);
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event): void {
+                if (empty($this->receiptLinks)) {
+                    return;
+                }
+
+                $sheet = $event->sheet->getDelegate();
+
+                foreach ($this->receiptLinks as $row => $url) {
+                    $cellCoordinate = "G{$row}";
+                    $sheet->getCell($cellCoordinate)->getHyperlink()->setUrl($url);
+                    $sheet->getStyle($cellCoordinate)->getFont()->setUnderline(true);
+                    $sheet->getStyle($cellCoordinate)->getFont()->getColor()->setARGB('FF0000FF');
+                }
+            },
+        ];
     }
 
     private function loadPaymentsForUsers(string $interval, array $userIds)
@@ -258,13 +284,15 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
         return $disk->url($receiptPath);
     }
 
-    private function buildReceiptLink(?string $receiptUrl): ?string
+    private function registerReceiptLink(?string $receiptUrl, int $rowIndex): ?string
     {
         if (! $receiptUrl) {
             return null;
         }
 
-        return sprintf('=HYPERLINK("%s","Ver comprovante")', $receiptUrl);
+        $this->receiptLinks[$rowIndex] = $receiptUrl;
+
+        return 'Ver comprovante';
     }
 
     private function slotKey(int $year, int $month, int $week, int $seq): string
