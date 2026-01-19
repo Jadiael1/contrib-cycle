@@ -137,11 +137,16 @@ class CollectiveProjectPaymentsController extends Controller
     )]
     public function options(Request $request, CollectiveProject $project)
     {
+        $validated = $request->validate([
+            'year'  => ['nullable', 'integer', 'min:1970', 'max:2100'],
+            'month' => ['nullable', 'integer', 'between:1,12'],
+        ]);
+
         $interval = $project->payment_interval;
         $per = (int) $project->payments_per_interval;
 
-        $year = (int) ($request->query('year', now()->year));
-        $month = $request->query('month');
+        $year  = (int) ($validated['year']  ?? now()->year);
+        $month = $validated['month'] ?? null;
 
         $resp = [
             'payment_interval' => $interval,
@@ -151,20 +156,18 @@ class CollectiveProjectPaymentsController extends Controller
 
         if ($interval === 'week') {
             if (!is_null($month)) {
-                $m = (int) $month;
-                $weeks = $this->weeksInMonth($year, $m);
+                $weeks = $this->weeksInMonthBySundays($year, (int)$month);
 
                 $labels = [
                     1 => 'Primeira Semana',
                     2 => 'Segunda Semana',
                     3 => 'Terceira Semana',
                     4 => 'Quarta Semana',
-                    5 => 'Quinta Semana',
-                    6 => 'Sexta Semana',
+                    5 => 'Quinta Semana'
                 ];
 
                 $resp['weeks_in_month'] = $weeks;
-                $resp['weeks'] = collect(range(1, $weeks))->map(fn ($w) => [
+                $resp['weeks'] = collect(range(1, $weeks))->map(fn($w) => [
                     'value' => $w,
                     'label' => $labels[$w] ?? "Semana {$w}",
                 ])->values();
@@ -284,7 +287,14 @@ class CollectiveProjectPaymentsController extends Controller
 
         try {
             $payment = DB::transaction(function () use (
-                $project, $user, $year, $month, $weekOfMonth, $sequence, $paidAt, $receiptPath
+                $project,
+                $user,
+                $year,
+                $month,
+                $weekOfMonth,
+                $sequence,
+                $paidAt,
+                $receiptPath
             ) {
                 return CollectiveProjectPayment::create([
                     'collective_project_id' => $project->id,
@@ -321,5 +331,21 @@ class CollectiveProjectPaymentsController extends Controller
         $days = (int) $firstDay->daysInMonth;
         $offset = (int) $firstDay->dayOfWeekIso - 1;
         return (int) ceil(($offset + $days) / 7);
+    }
+
+    private function weeksInMonthBySundays(int $year, int $month): int
+    {
+        $date = Carbon::create($year, $month, 1)->startOfDay();
+        $end  = $date->copy()->endOfMonth();
+
+        $sundays = 0;
+
+        for ($d = $date->copy(); $d->lte($end); $d->addDay()) {
+            if ($d->dayOfWeek === Carbon::SUNDAY) { // Carbon::SUNDAY = 0 :contentReference[oaicite:2]{index=2}
+                $sundays++;
+            }
+        }
+
+        return $sundays; // 4 ou 5
     }
 }
