@@ -105,6 +105,90 @@ class CollectiveProjectsController extends Controller
     }
 
     #[OA\Post(
+        path: '/api/v1/admin/projects/{project}/deactivate',
+        tags: ['Admin Projects'],
+        summary: 'Deactivate project',
+        description: 'Marks a project as inactive.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Project deactivated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
+    public function deactivate(CollectiveProject $project)
+    {
+        if ($project->is_active) {
+            $project->update(['is_active' => false]);
+        }
+
+        return response()->json(['message' => 'Project deactivated.']);
+    }
+
+    #[OA\Post(
+        path: '/api/v1/admin/projects/{project}/activate',
+        tags: ['Admin Projects'],
+        summary: 'Activate project',
+        description: 'Marks a project as active.',
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'project',
+                in: 'path',
+                required: true,
+                description: 'Project ID.',
+                schema: new OA\Schema(type: 'integer', format: 'int64')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Project activated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/MessageResponse')
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthenticated.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Project not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
+    public function activate(CollectiveProject $project)
+    {
+        if (! $project->is_active) {
+            $project->update(['is_active' => true]);
+        }
+
+        return response()->json(['message' => 'Project activated.']);
+    }
+
+    #[OA\Post(
         path: '/api/v1/admin/projects',
         tags: ['Admin Projects'],
         summary: 'Create project',
