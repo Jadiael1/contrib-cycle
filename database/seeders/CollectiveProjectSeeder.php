@@ -3,10 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\CollectiveProject;
+use App\Models\CollectiveProjectPayment;
 use App\Models\CollectiveProjectPaymentMethod;
 use App\Models\ProjectMembership;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class CollectiveProjectSeeder extends Seeder
@@ -209,15 +211,21 @@ class CollectiveProjectSeeder extends Seeder
                 'user_id' => $userId,
                 'status' => 'pending',
             ]);
+
+            $this->seedPaymentsForMember($project, $userId, null, $faker);
         }
 
         foreach ($acceptedIds as $userId) {
+            $acceptedAt = $faker->dateTimeBetween('-6 months', '-1 day');
+
             ProjectMembership::create([
                 'collective_project_id' => $project->id,
                 'user_id' => $userId,
                 'status' => 'accepted',
-                'accepted_at' => $faker->dateTimeBetween('-6 months', '-1 day'),
+                'accepted_at' => $acceptedAt,
             ]);
+
+            $this->seedPaymentsForMember($project, $userId, null, $faker);
         }
 
         foreach ($removedIds as $userId) {
@@ -232,7 +240,98 @@ class CollectiveProjectSeeder extends Seeder
                 'removed_at' => $removedAt,
                 'removed_by_user_id' => $adminId,
             ]);
+
+            $this->seedPaymentsForMember($project, $userId, $removedAt, $faker);
         }
+    }
+
+    private function seedPaymentsForMember(
+        CollectiveProject $project,
+        int $userId,
+        ?\DateTimeInterface $referenceDate,
+        $faker
+    ): void {
+        $paymentCount = $faker->randomElement([2, 4]);
+        $interval = $project->payment_interval;
+        $perInterval = max(1, (int) $project->payments_per_interval);
+
+        $reference = $referenceDate ? Carbon::instance($referenceDate) : Carbon::now();
+        $baseDate = $this->shiftDate($reference, $interval, -($paymentCount + random_int(1, 3)));
+
+        for ($i = 0; $i < $paymentCount; $i++) {
+            $paidAt = $this->shiftDate($baseDate, $interval, $i)
+                ->setTime(
+                    $faker->numberBetween(8, 20),
+                    $faker->numberBetween(0, 59),
+                    $faker->numberBetween(0, 59)
+                );
+
+            $period = $this->buildPeriodFromDate($interval, $paidAt);
+            $sequence = $this->resolveSequenceInPeriod($perInterval, $i, $faker);
+
+            CollectiveProjectPayment::create([
+                'collective_project_id' => $project->id,
+                'user_id' => $userId,
+                'period_year' => $period['period_year'],
+                'period_month' => $period['period_month'],
+                'period_week_of_month' => $period['period_week_of_month'],
+                'sequence_in_period' => $sequence,
+                'amount' => $project->amount_per_participant,
+                'paid_at' => $paidAt,
+            ]);
+        }
+    }
+
+    private function shiftDate(Carbon $date, string $interval, int $steps): Carbon
+    {
+        $shifted = $date->copy();
+
+        if ($steps === 0) {
+            return $shifted;
+        }
+
+        switch ($interval) {
+            case 'week':
+                return $steps > 0 ? $shifted->addWeeks($steps) : $shifted->subWeeks(abs($steps));
+            case 'month':
+                return $steps > 0 ? $shifted->addMonths($steps) : $shifted->subMonths(abs($steps));
+            case 'year':
+                return $steps > 0 ? $shifted->addYears($steps) : $shifted->subYears(abs($steps));
+            default:
+                return $shifted;
+        }
+    }
+
+    private function buildPeriodFromDate(string $interval, Carbon $date): array
+    {
+        $period = [
+            'period_year' => (int) $date->format('Y'),
+            'period_month' => 0,
+            'period_week_of_month' => 0,
+        ];
+
+        if ($interval === 'month' || $interval === 'week') {
+            $period['period_month'] = (int) $date->format('n');
+        }
+
+        if ($interval === 'week') {
+            $period['period_week_of_month'] = (int) ceil($date->day / 7);
+        }
+
+        return $period;
+    }
+
+    private function resolveSequenceInPeriod(int $perInterval, int $index, $faker): int
+    {
+        if ($perInterval <= 1) {
+            return 1;
+        }
+
+        if ($faker->boolean(35)) {
+            return $faker->numberBetween(1, $perInterval);
+        }
+
+        return ($index % $perInterval) + 1;
     }
 
     private function pickParticipantIds(
