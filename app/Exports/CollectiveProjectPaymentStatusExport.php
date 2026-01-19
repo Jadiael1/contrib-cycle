@@ -37,8 +37,8 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
             'Sobrenome',
             'Telefone',
             'Periodo',
-            'Parcela',
-            'Status',
+            'Intervalo por periodo',
+            'Situacao pagamento',
             'Pago em',
             'Valor esperado',
         ];
@@ -106,31 +106,10 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
             }
 
             foreach ($chunk as $m) {
-                $acceptedAt = $m->accepted_at ? Carbon::parse($m->accepted_at) : null;
-
                 foreach ($slots as $slot) {
-                    // aplica "not_applicable": aceitou depois do fim do slot
-                    if ($acceptedAt && $acceptedAt->greaterThan($slot['end'])) {
-                        yield [
-                            $m->first_name,
-                            $m->last_name,
-                            $m->phone,
-                            $slot['label'],
-                            $slot['sequence'],
-                            $this->translateStatus('not_applicable'),
-                            null,
-                            (string) $this->project->amount_per_participant,
-                        ];
-                        continue;
-                    }
-
                     $paidAtIso = $paid[(int)$m->user_id][$slot['key']] ?? null;
 
-                    if ($paidAtIso) {
-                        $status = 'paid';
-                    } else {
-                        $status = now()->greaterThan($slot['end']) ? 'overdue' : 'pending';
-                    }
+                    $status = $paidAtIso ? 'paid' : 'pending';
 
                     yield [
                         $m->first_name,
@@ -205,8 +184,7 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
 
             foreach ($rangeWeeks as $w) {
                 for ($seq = 1; $seq <= $per; $seq++) {
-                    $start = $this->weekStart($year, (int)$month, (int)$w);
-                    $end = (clone $start)->addDays(6)->endOfDay();
+                    [$start, $end] = $this->weekRangeBySundays($year, (int)$month, (int)$w);
 
                     $slots[] = [
                         'key' => $this->slotKey($year, (int)$month, (int)$w, $seq),
@@ -251,9 +229,7 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
     {
         return match ($status) {
             'paid' => 'Pago',
-            'overdue' => 'Em atraso',
             'pending' => 'Pendente',
-            'not_applicable' => 'Nao se aplica',
             default => $status,
         };
     }
@@ -265,10 +241,49 @@ class CollectiveProjectPaymentStatusExport extends StringValueBinder implements 
 
     private function weeksInMonth(int $year, int $month): int
     {
-        $firstDay = Carbon::create($year, $month, 1);
-        $days = (int) $firstDay->daysInMonth;
-        $offset = (int) $firstDay->dayOfWeekIso - 1;
-        return (int) ceil(($offset + $days) / 7);
+        return count($this->sundaysInMonth($year, $month));
+    }
+
+    private function weekRangeBySundays(int $year, int $month, int $week): array
+    {
+        $firstDay = Carbon::create($year, $month, 1)->startOfDay();
+        $endOfMonth = $firstDay->copy()->endOfMonth()->endOfDay();
+        $sundays = $this->sundaysInMonth($year, $month);
+
+        if (empty($sundays)) {
+            return [$firstDay, $endOfMonth];
+        }
+
+        $maxWeek = count($sundays);
+        $week = max(1, min($week, $maxWeek));
+
+        if ($week === 1) {
+            return [$firstDay, $sundays[0]->copy()->endOfDay()];
+        }
+
+        $prevSunday = $sundays[$week - 2]->copy();
+        $start = $prevSunday->addDay()->startOfDay();
+
+        if ($week === $maxWeek) {
+            return [$start, $endOfMonth];
+        }
+
+        return [$start, $sundays[$week - 1]->copy()->endOfDay()];
+    }
+
+    private function sundaysInMonth(int $year, int $month): array
+    {
+        $date = Carbon::create($year, $month, 1)->startOfDay();
+        $end = $date->copy()->endOfMonth();
+        $sundays = [];
+
+        for ($d = $date->copy(); $d->lte($end); $d->addDay()) {
+            if ($d->dayOfWeek === Carbon::SUNDAY) {
+                $sundays[] = $d->copy()->startOfDay();
+            }
+        }
+
+        return $sundays;
     }
 
     private function weekStart(int $year, int $month, int $week): Carbon
