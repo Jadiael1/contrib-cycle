@@ -27,14 +27,14 @@ class CollectiveProjectPaymentStatusExport implements FromGenerator, WithHeading
     public function headings(): array
     {
         return [
-            'first_name',
-            'last_name',
-            'phone',
-            'period_label',
-            'sequence',
-            'status',
-            'paid_at',
-            'amount_expected',
+            'Nome',
+            'Sobrenome',
+            'Telefone',
+            'Periodo',
+            'Parcela',
+            'Status',
+            'Pago em',
+            'Valor esperado',
         ];
     }
 
@@ -111,7 +111,7 @@ class CollectiveProjectPaymentStatusExport implements FromGenerator, WithHeading
                             $m->phone,
                             $slot['label'],
                             $slot['sequence'],
-                            'not_applicable',
+                            $this->translateStatus('not_applicable'),
                             null,
                             (string) $this->project->amount_per_participant,
                         ];
@@ -132,7 +132,7 @@ class CollectiveProjectPaymentStatusExport implements FromGenerator, WithHeading
                         $m->phone,
                         $slot['label'],
                         $slot['sequence'],
-                        $status,
+                        $this->translateStatus($status),
                         $paidAtIso,
                         (string) $this->project->amount_per_participant,
                     ];
@@ -222,6 +222,17 @@ class CollectiveProjectPaymentStatusExport implements FromGenerator, WithHeading
         }
 
         return $slots;
+    }
+
+    private function translateStatus(string $status): string
+    {
+        return match ($status) {
+            'paid' => 'Pago',
+            'overdue' => 'Em atraso',
+            'pending' => 'Pendente',
+            'not_applicable' => 'Nao se aplica',
+            default => $status,
+        };
     }
 
     private function slotKey(int $year, int $month, int $week, int $seq): string
