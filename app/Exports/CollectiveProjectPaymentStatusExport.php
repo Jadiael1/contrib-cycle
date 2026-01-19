@@ -10,9 +10,15 @@ use Generator;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromGenerator;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class CollectiveProjectPaymentStatusExport implements FromGenerator, WithHeadings
+class CollectiveProjectPaymentStatusExport extends StringValueBinder implements FromGenerator, WithHeadings, WithColumnFormatting, WithCustomValueBinder
 {
     use Exportable;
 
@@ -139,6 +145,23 @@ class CollectiveProjectPaymentStatusExport implements FromGenerator, WithHeading
                 }
             }
         }
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'C' => NumberFormat::FORMAT_TEXT,
+        ];
+    }
+
+    public function bindValue(Cell $cell, $value): bool
+    {
+        if ($cell->getColumn() === 'C') {
+            $cell->setValueExplicit((string) $value, DataType::TYPE_STRING);
+            return true;
+        }
+
+        return parent::bindValue($cell, $value);
     }
 
     private function loadPaymentsForUsers(string $interval, array $userIds)
